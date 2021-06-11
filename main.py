@@ -2,13 +2,9 @@ import pyglet
 from pyglet import shapes
 from pyglet.window import key
 
-ball_vel_y = 1
-ball_vel_x = 1
-
 window = pyglet.window.Window(width=640, height=420)
 batch = pyglet.graphics.Batch()
 
-#ball = shapes.Rectangle(320, 210, 10, 10, batch=batch)
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
 
@@ -32,7 +28,7 @@ class Paddel:
         self.paddel.x = pos_x
     
     def getPos(self):
-        return (self.paddel.y,self.paddel.x)
+        return (self.paddel.x,self.paddel.y)
     
     def up(self,dt):
         self.paddel.y += self.paddel_vel * dt
@@ -55,17 +51,19 @@ class Game:
         self.opponent_paddel.setPos(210, 635)
         
 
- 
-
     def update(self, dt):
         if keys[key.W]:
             game.player_paddel.up(dt)
         if keys[key.S]:
-            game.player_paddel.down(dt)  
+            game.player_paddel.down(dt)
+        self.chaseBall(self.ball,self.opponent_paddel,dt)
         self.ball.y += self.ball_vel_y * dt
         self.ball.x += self.ball_vel_x * dt
 
         if self.checkCollision(self.player_paddel):
+            self.ball_vel_y = self.ball_vel_y * -1
+            self.ball_vel_x = self.ball_vel_x * -1
+        if self.checkCollision(self.opponent_paddel):
             self.ball_vel_y = self.ball_vel_y * -1
             self.ball_vel_x = self.ball_vel_x * -1
         #check if upper wall
@@ -83,16 +81,16 @@ class Game:
         self.ball_min_x = self.ball.x - 5
         self.ball_max_x = self.ball.x + 5
 
-        self.paddel_pos_y, self.paddel_pos_x = paddel.getPos()
+        self.paddel_pos_x, self.paddel_pos_y = paddel.getPos()
 
 
         self.paddel_size_half = paddel.paddel_size / 2
 
-        self.paddel_min_x = self.paddel_pos_x - self.paddel_size_half
+        self.paddel_min_x = self.paddel_pos_x - 2.5
         self.paddel_min_y = self.paddel_pos_y - self.paddel_size_half
 
         self.paddel_max_y = self.paddel_pos_y + self.paddel_size_half
-        self.paddel_max_x = self.paddel_pos_x + self.paddel_size_half
+        self.paddel_max_x = self.paddel_pos_x + 2.5
 
         if self.ball_max_x < self.paddel_min_x:
             return False
@@ -103,13 +101,17 @@ class Game:
         if self.ball_min_y > self.paddel_max_y:
             return False
         return True
+    
+    def chaseBall(self, ball, paddel, dt):
+        self.paddel_pos_x, self.paddel_pos_y = paddel.getPos()
+        if self.paddel_pos_y < ball.y:
+            if not self.paddel_pos_y >= 420:
+                paddel.up(dt)
+        if self.paddel_pos_y > ball.y:
+            if not self.paddel_pos_y <= 0:
+                paddel.down(dt)
+
         
-        
-
-
-
-
-
 
 game = Game()
   
@@ -119,8 +121,7 @@ def on_draw():
     batch.draw()
 
 def main():
-    pyglet.clock.schedule_interval(game.update, 1/60)
-    
+    pyglet.clock.schedule_interval(game.update, 1/60)  
     pyglet.app.run()
     
 
