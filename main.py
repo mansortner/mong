@@ -107,7 +107,7 @@ class Game:
         self.paddel_size_half = paddel.paddel_size / 2
 
         self.paddel_min_x = self.paddel_pos_x - 2.5
-        self.paddel_min_y = self.paddel_pos_y - self.paddel_size_half
+        self.paddel_min_y = self.paddel_pos_y 
 
         self.paddel_max_y = self.paddel_pos_y + self.paddel_size_half
         self.paddel_max_x = self.paddel_pos_x + 2.5
