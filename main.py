@@ -12,7 +12,7 @@ window.push_handlers(keys)
 class Ball:
     def __init__(self) -> None:
         self.ball_start_pos_x = 320
-        self.ball_start_pos_y = 210
+        self.ball_start_pos_y = 200
         self.ball = shapes.Rectangle(self.ball_start_pos_x, self.ball_start_pos_y, 10, 10, batch=batch)
         self.ball_vel_x = -100
         self.ball_vel_y = 100
@@ -54,22 +54,30 @@ class Game:
         self.ball_vel_x = self._ball.ball_vel_x
         self.ball_vel_y = self._ball.ball_vel_y
         self.player_paddel = Paddel()
-        self.player_paddel.setPos(210, 5)
+        self.player_paddel.setPos(190, 5)
         self.player_score = 0
         self.opponent_paddel = Paddel()
-        self.opponent_paddel.setPos(210, 635)
+        self.opponent_paddel.setPos(190, 635)
         self.opponent_score = 0
+        self.game_active = False
 
         
 
     def update(self, dt):
+        #Controll the paddle
         if keys[key.W]:
             game.player_paddel.up(dt)
         if keys[key.S]:
             game.player_paddel.down(dt)
+        #Turn on the game
+        if keys[key.SPACE]:
+            self.game_active = True
+
         self.chaseBall(self.ball,self.opponent_paddel,dt)
-        self.ball.y += self.ball_vel_y * dt
-        self.ball.x += self.ball_vel_x * dt
+
+        if self.game_active:
+            self.ball.y += self.ball_vel_y * dt
+            self.ball.x += self.ball_vel_x * dt
 
         if self.checkCollision(self.player_paddel):
             self.ball_vel_y = self.ball_vel_y * -1
@@ -77,8 +85,10 @@ class Game:
         if self.checkCollision(self.opponent_paddel):
             self.ball_vel_y = self.ball_vel_y * -1
             self.ball_vel_x = self.ball_vel_x * -1
+            
         bScored, who_scored = self.checkScore(self.ball)    
         if bScored:
+            self.game_active = False
             if who_scored == 0:
                 self.player_score += 1
             else:
@@ -87,10 +97,10 @@ class Game:
             print("\nPlayer: %s\nOpponent: %s" %(self.player_score, self.opponent_score))
 
         #check if upper wall
-        if self.ball.y >= 419:
+        if self.ball.y >= 415:
             self.ball_vel_y = self.ball_vel_y * -1
         #check if lower wall
-        if self.ball.y <= 1:
+        if self.ball.y <= 5:
             self.ball_vel_y = self.ball_vel_y * -1
         #check if with in p
 
@@ -102,7 +112,6 @@ class Game:
         self.ball_max_x = self.ball.x + 5
 
         self.paddel_pos_x, self.paddel_pos_y = paddel.getPos()
-
 
         self.paddel_size_half = paddel.paddel_size / 2
 
