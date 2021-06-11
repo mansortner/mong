@@ -11,9 +11,15 @@ window.push_handlers(keys)
 
 class Ball:
     def __init__(self) -> None:
-        self.ball = shapes.Rectangle(320, 210, 10, 10, batch=batch)
+        self.ball_start_pos_x = 320
+        self.ball_start_pos_y = 210
+        self.ball = shapes.Rectangle(self.ball_start_pos_x, self.ball_start_pos_y, 10, 10, batch=batch)
         self.ball_vel_x = -100
         self.ball_vel_y = 100
+        
+    def setPos(self, pos_x, pos_y):
+        self.ball.x = pos_x
+        self.ball.y = pos_y
 
 class Paddel:
     def __init__(self) -> None:
@@ -31,10 +37,12 @@ class Paddel:
         return (self.paddel.x,self.paddel.y)
     
     def up(self,dt):
-        self.paddel.y += self.paddel_vel * dt
+        if not self.paddel.y >= 380:
+            self.paddel.y += self.paddel_vel * dt
 
     def down(self,dt):
-        self.paddel.y += -self.paddel_vel * dt
+        if not self.paddel.y <= 0:
+            self.paddel.y += -self.paddel_vel * dt
 
         
 
@@ -47,8 +55,11 @@ class Game:
         self.ball_vel_y = self._ball.ball_vel_y
         self.player_paddel = Paddel()
         self.player_paddel.setPos(210, 5)
+        self.player_score = 0
         self.opponent_paddel = Paddel()
         self.opponent_paddel.setPos(210, 635)
+        self.opponent_score = 0
+
         
 
     def update(self, dt):
@@ -66,6 +77,15 @@ class Game:
         if self.checkCollision(self.opponent_paddel):
             self.ball_vel_y = self.ball_vel_y * -1
             self.ball_vel_x = self.ball_vel_x * -1
+        bScored, who_scored = self.checkScore(self.ball)    
+        if bScored:
+            if who_scored == 0:
+                self.player_score += 1
+            else:
+                self.opponent_score += 1
+            self._ball.setPos(self._ball.ball_start_pos_x, self._ball.ball_start_pos_y)
+            print("\nPlayer: %s\nOpponent: %s" %(self.player_score, self.opponent_score))
+
         #check if upper wall
         if self.ball.y >= 419:
             self.ball_vel_y = self.ball_vel_y * -1
@@ -110,6 +130,13 @@ class Game:
         if self.paddel_pos_y > ball.y:
             if not self.paddel_pos_y <= 0:
                 paddel.down(dt)
+    
+    def checkScore(self,ball):
+        if ball.x >= 640:
+            return True, 0
+        if ball.x <= 0:
+            return True, 1
+        return False, None
 
         
 
